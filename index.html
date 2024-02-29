@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #player{
+            width: 60px;
+            height: 30px;
+            background:none;
+            z-index: 0;
+            position: absolute;
+            transition-duration:0.2s ;
+            left: 20px;
+            top: 20px;
+        }
+        #ennemi{
+            width: 60px;
+            height: 30px;
+            background:none;
+            z-index: 0;
+            position: absolute;
+            transition-duration:0.2s ;
+            left: 500px;
+            top: 20px;
+            transform:rotateY(-160DEG) rotateZ(10deg);
+        }
+        #player img{
+            position: relative;
+            z-index: 1;
+            top: -55px;
+            width:200px;
+            left: -65px;
+        }
+        #ennemi img{
+            position: relative;
+            z-index: 1;
+            top: -285px;
+            width:200px;
+            left: -65px;
+        }
+        #missile{
+            width:40px;
+            height: 10px;
+            background-color: none;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            /*transform: translate(30px, -130px);*/
+           
+        }
+        #missile img{
+            width: 70%;
+            position: absolute;
+            left: -5px;
+            top: 132px;
+            transform: rotateZ(90deg);
+          
+
+        
+        }
+
+    body{
+        overflow: hidden;
+    }
+   
+    </style>
+</head>
+<body>
+    <br> <br>
+    <p id="l">l:0</p>
+    <p id="t">t:0</p>
+    <div id="player">
+        <img src="choppeer1.png" alt="" srcset="" id="plImg">
+        <!--div id="missile">
+            <img src="missile.png" alt="" srcset="" -->
+        </div>
+    </div>
+        <script>
+            var player=document.getElementById("player");
+            var lOrder=false;
+            var rOrder=false;
+            var tOrder=false;
+            var bOrder=false;
+            var paused=false;
+            var missImg;
+            var boom,boom2,enH;
+            var bmm=[];
+            var miss;
+            var rafP=false;
+            var plLeft=20;
+            var plTop=20;
+            var msLeft=999,msTop=0;
+            var msLDis=1000,msTDis=0;;
+            plSpeed=80; 
+            var ennemies=[] , 
+            enLeft=  [],enTop=[]; 
+            var tDis=[];
+            var lDis=[]; 
+            var enHealth=[];
+            enSpeed=5; 
+            var boom2;
+            var msGo=false;
+            window.addEventListener("keydown",function(e){
+                if(e.key=="ArrowLeft"){
+                   lOrder=true
+                }
+                if(e.key=="ArrowRight"){
+                   rOrder=true
+                }
+                if(e.key=="ArrowUp"){
+                   tOrder=true
+                }
+                if(e.key=="ArrowDown"){
+                   bOrder=true
+                }
+                if(e.key=="Enter"){
+                   pose()
+                }
+                if(e.key=="s"){
+                   shoot()
+                }
+                if(e.key=="r"){
+                  rafP=true;
+                }
+            })
+            window.addEventListener("keyup",function(e){
+                if(e.key=="ArrowLeft"){
+                   lOrder=false
+                   player.style.transform="rotateZ(0deg)"
+
+                }
+                if(e.key=="ArrowRight"){
+                   rOrder=false
+                   player.style.transform="rotateZ(0deg)"
+                }
+                if(e.key=="ArrowUp"){
+                   tOrder=false
+                   player.style.transform="rotateZ(0deg)"
+                }
+                if(e.key=="ArrowDown"){
+                   bOrder=false
+                   player.style.transform="rotateZ(0deg)"
+                }
+                if(e.key=="r"){
+                  rafP=false;
+                  plImg.src="choppeer1.png"
+                }
+            })
+            
+
+setInterval(function(){
+if(lOrder){
+    left();
+}
+if(rOrder){
+    right();
+}
+if(tOrder){
+    topp();
+}
+if(bOrder){
+    bottom();
+}
+
+},100)
+setInterval(function(){if(rafP){
+    raffale();
+}},10)
+            function left(){
+                player.style.transform="rotateZ(-30deg)"
+                plLeft-=plSpeed;
+                player.style.left=plLeft+"px";
+
+            }
+            function right(){
+                player.style.transform="rotateZ(30deg)"
+                plLeft+=plSpeed;
+                player.style.left=plLeft+"px";
+
+            }
+            function topp(){
+                player.style.transform="rotateZ(-15deg)"
+                plTop-=plSpeed;
+                player.style.top=plTop+"px";
+
+            }
+            function bottom(){
+                player.style.transform="rotateZ(15deg)"
+                plTop+=plSpeed;
+                player.style.top=plTop+"px";
+
+            }
+           function createEnemi(){
+var enemi=document.createElement("div");
+var enImg=document.createElement("img");
+ enH=document.createElement("p");
+ boom2=document.createElement("img");
+ enemi.appendChild(boom2);
+ boom2.style.transform=" rotateZ(-15deg) translate(0px,120px)";
+ boom2.src="explo2.webp";
+ boom2.style.position="relative";
+ boom2.style.zIndex="2";
+ boom2.style.opacity="0";
+//enemi.appendChild(enH);
+enH.innerHTML="100"
+enemi.appendChild(enImg);
+enImg.src="ennemi.png"
+enemi.id="ennemi";
+document.body.appendChild(enemi);
+ennemies.push(enemi);
+enLeft.push(500);
+bmm.push(boom2);
+var num=Math.floor(Math.random()*20);
+var plTR=20*num;
+enHealth.push(100);
+enemi.style.top=plTR+"px";
+enTop.push(plTR);
+lDis.push(480);
+tDis.push(0);
+           }
+        createEnemi()
+       setInterval(createEnemi,2000)
+        setInterval(function(){
+            if(!paused){
+for (let i = 0; i < ennemies.length; i++) {
+    if(plLeft>enLeft[i]){
+        lDis[i]=(plLeft-enLeft[i]);
+    }
+   else{
+        lDis[i]=(enLeft[i]-plLeft);
+    }
+
+    if(plTop>enTop[i]){
+        tDis[i]=(plTop-enTop[i]);
+    }
+   else{
+        tDis[i]=(enTop[i]-plTop);
+    }
+    l.innerHTML="ll:"+lDis[0];
+            t.innerHTML="tt:"+tDis[0];
+    if(enLeft[i]>-120){
+moveLeft(i);
+
+    }
+    
+    else{
+        ennemies[i].remove()
+       /* enLeft[i].remove();
+        enTop[i].remove();*/
+    }
+    
+    if(lDis[i]<=30 && tDis[i]<=30){
+        ennemies[i].remove()
+        enLeft[i]=Infinity;
+enTop[i]=Infinity;
+        /*enLeft[i].remove();
+        enTop[i].remove();*/
+    }
+    
+}} 
+        },100)
+        function moveLeft(e){
+
+            enLeft[e]-=enSpeed;
+ennemies[e].style.left=enLeft[e]+"px";
+        }
+        function pose(){
+            if(paused)
+            paused=false;
+
+            else
+            paused=true;
+        }
+
+        function shoot(){
+          if(!paused && !msGo){  
+          /*  missile.style.display="block";*/
+        msGo=true;
+         miss=document.createElement("div");
+         missImg=document.createElement("img");
+        boom=document.createElement("img");
+         miss.appendChild(boom);
+        boom.style.width="100px";
+        boom.src="";
+        boom.style.transform="rotateZ(0deg) translate(-40px,-30px)";
+        document.body.appendChild(miss); 
+        miss.appendChild(missImg);
+        msLeft=plLeft+10;
+        msTop=plTop-130;
+        miss.id="missile"
+        missImg.id="missileImg"
+        missImg.src="missile.png";
+        miss.style.top=msTop+"px"
+        miss.style.left=msLeft+"px"
+        }
+            
+        }
+        setInterval(function(){
+           
+
+            if(msGo && !paused){
+                if(msLeft<700){
+                msLeft+=10;
+                miss.style.left=msLeft+"px";
+            }
+            else{
+                msLeft=700;
+               
+                miss.style.left=msLeft+"px";
+                msGo=false;
+                missImg.style.display="none"
+                boom.src="explo.webp";
+                setTimeout(function(){
+                    msTop=1000;
+                miss.remove();
+                missImg.style.display="block"
+                boom.src="";
+                },400)
+                
+            }
+
+            for (let i = 0; i < ennemies.length; i++) {
+              if(enLeft[i]>msLeft){
+                msLDis=enLeft[i]-msLeft;
+              }
+              else{
+                msLDis=msLeft-enLeft[i];
+              }
+              if(enTop[i]>msTop){
+                msTDis=enTop[i]-msTop;
+              }
+              else{
+                msTDis=msTop-enTop[i];
+              }
+             
+if(msLDis<30 && (msTDis>=120 && msTDis<=140) ){
+
+enLeft[i]=Infinity;
+enTop[i]=Infinity;
+missImg.style.display="none"
+msGo=false;
+bmm[i].src="";
+                bmm[i].style.opacity="1";
+                bmm[i].src="explo2.webp";
+                bmm.src="explo.webp";
+                setTimeout(function(){
+                    ennemies[i].remove();
+                    bmm[i].src="";
+                bmm[i].style.opacity="1";
+                    msTop=1000;
+                miss.remove();
+                boom.src="";
+                },400)
+
+               /* msTop=1000;
+                miss.style.left=msLeft+"px";
+               
+                miss.remove();*/
+}
+                
+            }
+            }
+        },20);
+        var count=0
+var srcs=["choppeer1.png","choppeer3.png"];
+        function raffale(){
+    if(count<srcs.length){
+plImg.src =srcs[count];
+count++;}
+else{count=0;}
+
+
+    for (let i = 0; i < ennemies.length; i++) {
+        if(tDis[i]>=10 && tDis[i]<=20){  
+        if(enHealth[i]>0)
+        {enHealth[i]-=1;
+       // enH.innerHTML=enHealth[i];
+    }
+        else{
+            bmm[i].src="";
+                bmm[i].style.opacity="1";
+                bmm[i].src="explo2.webp";
+               bmm.src="explo.webp";
+                setTimeout(function(){
+                    ennemies[i].remove();
+                    bmm[i].src="";
+                bmm[i].style.opacity="0";
+                },400)
+        }
+    }
+}
+        }
+
+        
+        </script>
+</body>
+</html>
